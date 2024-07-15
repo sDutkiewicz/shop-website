@@ -1,13 +1,8 @@
-from flask import Flask, jsonify, request, Blueprint, render_template
+from flask import Blueprint, jsonify, request, render_template
+from backend import db
+from backend.models import Product
 
 routes = Blueprint('routes', __name__)
-
-# Sample data for products
-products = [
-    {'id': 1, 'name': 'Product 1', 'price': 10.0},
-    {'id': 2, 'name': 'Product 2', 'price': 20.0},
-    {'id': 3, 'name': 'Product 3', 'price': 30.0},
-]
 
 @routes.route('/')
 def index():
@@ -19,18 +14,19 @@ def admin():
 
 @routes.route('/api/products', methods=['GET'])
 def get_products():
-    return jsonify(products)
+    products = Product.query.all()
+    products_list = [{'id': p.id, 'name': p.name, 'price': p.price} for p in products]
+    return jsonify(products_list)
 
 @routes.route('/api/products/<int:product_id>', methods=['GET'])
 def get_product(product_id):
-    product = next((p for p in products if p['id'] == product_id), None)
-    if product is not None:
-        return jsonify(product)
-    return jsonify({'error': 'Product not found'}), 404
+    product = Product.query.get_or_404(product_id)
+    return jsonify({'id': product.id, 'name': product.name, 'price': product.price})
 
 @routes.route('/api/products', methods=['POST'])
 def add_product():
-    new_product = request.get_json()
-    new_product['id'] = len(products) + 1
-    products.append(new_product)
-    return jsonify(new_product), 201
+    data = request.get_json()
+    new_product = Product(name=data['name'], price=data['price'])
+    db.session.add(new_product)
+    db.session.commit()
+    return jsonify({'id': new_product.id, 'name': new_product.name, 'price': new_product.price}), 201
