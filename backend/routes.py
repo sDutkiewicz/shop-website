@@ -1,32 +1,51 @@
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
+from werkzeug.utils import secure_filename
 from backend import db
 from backend.models import Product
+import os
 
 routes = Blueprint('routes', __name__)
 
 @routes.route('/')
 def index():
-    return render_template('index.html')
+    products = Product.query.all()  # Fetch all products from the database
+    return render_template('index.html', products=products)
 
 @routes.route('/admin')
 def admin():
     return render_template('admin.html')
 
-@routes.route('/api/products', methods=['GET'])
-def get_products():
-    products = Product.query.all()
-    products_list = [{'id': p.id, 'name': p.name, 'price': p.price} for p in products]
-    return jsonify(products_list)
-
-@routes.route('/api/products/<int:product_id>', methods=['GET'])
-def get_product(product_id):
+@routes.route('/product/<int:product_id>')
+def product_detail(product_id):
     product = Product.query.get_or_404(product_id)
-    return jsonify({'id': product.id, 'name': product.name, 'price': product.price})
+    return render_template('product_detail.html', product=product)
 
-@routes.route('/api/products', methods=['POST'])
+@routes.route('/admin/add-product', methods=['POST'])
 def add_product():
-    data = request.get_json()
-    new_product = Product(name=data['name'], price=data['price'])
-    db.session.add(new_product)
-    db.session.commit()
-    return jsonify({'id': new_product.id, 'name': new_product.name, 'price': new_product.price}), 201
+    name = request.form['name']
+    price = request.form['price']
+    image = request.files['image']
+    
+    if image:
+        # Ensure the 'static/uploads' directory exists
+        upload_folder = os.path.join('static', 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+
+        # Save the image
+        filename = secure_filename(image.filename)
+        image_path = os.path.join(upload_folder, filename)
+        image.save(image_path)
+        
+        # Convert the file system path to a URL path by replacing backslashes with forward slashes
+        relative_image_path = os.path.join('uploads', filename).replace(os.sep, '/')
+        
+        # Save product to the database
+        new_product = Product(name=name, price=price, image_url=relative_image_path)
+        db.session.add(new_product)
+        db.session.commit()
+        
+        flash('Product added successfully!', 'success')
+    else:
+        flash('Error uploading image.', 'danger')
+
+    return redirect(url_for('routes.admin'))

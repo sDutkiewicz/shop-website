@@ -8,15 +8,18 @@
 </head>
 <body>
     <h1>Admin - Add Product</h1>
-    <form id="productForm">
+    <form id="productForm" method="POST" action="/admin/add-product" enctype="multipart/form-data">
         <label for="name">Product Name:</label>
         <input type="text" id="name" name="name" required>
         <br>
         <label for="price">Product Price:</label>
         <input type="number" id="price" name="price" step="0.01" required>
         <br>
+        <label for="image">Product Image:</label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+        <br>
         <button type="submit">Add Product</button>
     </form>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <a href="/">Back to Main Page</a>
 </body>
 </html>
