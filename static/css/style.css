@@ -1,60 +1,83 @@
-body {
-    font-family: Arial, sans-serif;
+/* Reset some default browser styles */
+body, h1, h2, p, ul {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+}
+
+body {
+    font-family: 'Arial', sans-serif;  /* Set a default font for the page */
+    background-color: #f8f9fa;         /* Light gray background color */
 }
 
 h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
     text-align: center;
-    margin: 20px 0;
+    font-weight: bold;
+    color: #333;  /* Dark gray text color */
 }
 
+/* Container for the entire product grid */
 .product-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 20px;  /* Space between product cards */
     padding: 20px;
 }
 
+/* Individual product card */
 .product-card {
     background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 200px;
-    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    width: 200px;  /* Width of each product card */
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
 }
 
+/* Hover effect to slightly lift the card */
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Image styling */
 .product-image {
-    max-width: 100%;
+    width: 100%;
     height: auto;
-    border-radius: 5px;
+    margin-bottom: 10px;
+    object-fit: contain; /* Ensure image scales down if too large */
 }
 
+/* Product name styling */
 .product-name {
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-.product-price {
-    color: #e60000;
     font-size: 16px;
-    margin: 10px 0;
+    font-weight: bold;
+    color: #333; /* Darker text color */
+    margin-bottom: 8px;
 }
 
-.product-details-button {
-    display: inline-block;
-    padding: 8px 15px;
-    margin-top: 10px;
-    background-color: #333;
+/* Product price styling */
+.product-price {
+    font-size: 18px;
+    color: #e74c3c; /* Red color for price */
+    margin-bottom: 10px;
+}
+
+/* Button styling */
+.product-details-button,
+.product-details-button:hover {
+    background-color: #007bff; /* Blue button color */
     color: white;
+    padding: 10px;
     text-decoration: none;
     border-radius: 5px;
-    transition: background-color 0.3s;
+    display: inline-block;
+    margin-top: 10px;
 }
 
 .product-details-button:hover {
-    background-color: #555;
+    background-color: #0056b3; /* Darker blue on hover */
 }
