@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import './productDetail.css';
-
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -28,7 +26,7 @@ const ProductDetail = () => {
         <div className="product-detail">
             <div className="image-gallery">
                 {images.map((image, index) => (
-                    <img key={index} src={`/uploads/${image}`} alt={`${product.name} ${index + 1}`} className="product-image" />
+                    <img key={index} src={image} alt={`${product.name} ${index + 1}`} className="product-image" />
                 ))}
             </div>
             <h1>{product.name}</h1>

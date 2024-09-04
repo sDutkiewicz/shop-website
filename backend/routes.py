@@ -25,18 +25,21 @@ def serve_react_app(path):
             return abort(404)
 
 # API to get all products
-@routes.route('/api/products', methods=['GET'])
-def get_products():
-    products = Product.query.all()
-    products_list = [{
+@routes.route('/api/products/<int:id>', methods=['GET'])
+def get_product(id):
+    product = Product.query.get_or_404(id)
+    product_data = {
         'id': product.id,
         'name': product.name,
         'price': product.price,
         'description': product.description,
         'date_added': product.date_added.strftime('%Y-%m-%d') if product.date_added else 'N/A',
-        'image_url': f'/uploads/{product.image_url_1}' if product.image_url_1 else None
-    } for product in products]
-    return jsonify(products_list)
+        'image_url_1': f'/uploads/{product.image_url_1}' if product.image_url_1 else None,
+        'image_url_2': f'/uploads/{product.image_url_2}' if product.image_url_2 else None,
+        'image_url_3': f'/uploads/{product.image_url_3}' if product.image_url_3 else None,
+    }
+    return jsonify(product_data)
+
 
 
 # API to add a new product
