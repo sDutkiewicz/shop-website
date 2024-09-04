@@ -1,12 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_migrate import Migrate  # Import Flask-Migrate
 from config.config import Config
 import os
 
 db = SQLAlchemy()
+migrate = Migrate()  
 
-# New upload folder outside of static directory
 UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../uploads')
 
 def create_app():
@@ -24,6 +24,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'wowow'
     
     db.init_app(app)
+    migrate.init_app(app, db)  # Initialize Flask-Migrate with your app and db
 
     with app.app_context():
         from backend import routes

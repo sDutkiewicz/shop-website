@@ -13,15 +13,15 @@ def serve_react_app(path):
     print(f"Full path to file: {full_path}")
 
     if path != "" and os.path.exists(full_path):
-        # print(f"Serving file from static directory: {full_path}")
+        print(f"Serving file from static directory: {full_path}")
         return send_from_directory(current_app.static_folder, path)
     else:
         index_path = os.path.join(current_app.static_folder, 'index.html')
         if os.path.exists(index_path):
-            # print(f"File not found. Serving index.html from static directory: {index_path}")
+            print(f"File not found. Serving index.html from static directory: {index_path}")
             return send_from_directory(current_app.static_folder, 'index.html')
         else:
-            # print(f"index.html not found in the static directory: {index_path}")
+            print(f"index.html not found in the static directory: {index_path}")
             return abort(404)
 
 # API to get all products
@@ -32,34 +32,52 @@ def get_products():
         'id': product.id,
         'name': product.name,
         'price': product.price,
-        'image_url': f'/uploads/{product.image_url}'  
+        'description': product.description,
+        'date_added': product.date_added.strftime('%Y-%m-%d') if product.date_added else 'N/A',
+        'image_url': f'/uploads/{product.image_url_1}' if product.image_url_1 else None
     } for product in products]
     return jsonify(products_list)
+
 
 # API to add a new product
 @routes.route('/admin/add-product', methods=['POST'])
 def add_product():
     name = request.form.get('name')
     price = request.form.get('price')
-    image = request.files.get('image')
+    description = request.form.get('description')  # Get the description
+    image_1 = request.files.get('image_1')
+    image_2 = request.files.get('image_2')
+    image_3 = request.files.get('image_3')
 
-    if image:
-        image_filename = image.filename
-        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename)
-        image.save(image_path)
+    new_product = Product(
+        name=name,
+        price=price,
+        description=description
+    )
 
-        new_product = Product(
-            name=name,
-            price=price,
-            image_url=image_filename 
-        )
+    # Save images if they are provided
+    if image_1:
+        image_filename_1 = image_1.filename
+        image_path_1 = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename_1)
+        image_1.save(image_path_1)
+        new_product.image_url_1 = image_filename_1
 
-        db.session.add(new_product)
-        db.session.commit()
+    if image_2:
+        image_filename_2 = image_2.filename
+        image_path_2 = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename_2)
+        image_2.save(image_path_2)
+        new_product.image_url_2 = image_filename_2
 
-        return jsonify({'message': 'Product added successfully!'}), 201
+    if image_3:
+        image_filename_3 = image_3.filename
+        image_path_3 = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename_3)
+        image_3.save(image_path_3)
+        new_product.image_url_3 = image_filename_3
 
-    return jsonify({'message': 'Failed to add product. Missing data.'}), 400
+    db.session.add(new_product)
+    db.session.commit()
+
+    return jsonify({'message': 'Product added successfully!'}), 201
 
 # Serve uploaded images
 @routes.route('/uploads/<filename>')
