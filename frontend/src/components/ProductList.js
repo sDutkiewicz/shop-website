@@ -9,6 +9,7 @@ const ProductList = () => {
     useEffect(() => {
         axios.get('/api/products')
             .then(response => {
+                console.log('Products fetched:', response.data); // Debug: Check what data is being received
                 setProducts(response.data);
             })
             .catch(error => {
@@ -16,11 +17,14 @@ const ProductList = () => {
             });
     }, []);
 
+    if (products.length === 0) {
+        return <div>No products found.</div>;
+    }
+
     return (
         <div className="product-grid">
             {products.map(product => (
                 <div className="product-card" key={product.id}>
-                    {/* Display only the first image */}
                     {product.image_url && (
                         <img src={product.image_url} alt={product.name} className="product-image" />
                     )}
