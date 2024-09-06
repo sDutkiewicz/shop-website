@@ -6,6 +6,8 @@ import './style.css';
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [sortCriteria, setSortCriteria] = useState({ field: '', order: '' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 20;
 
     useEffect(() => {
         axios.get('/api/products')
@@ -50,6 +52,18 @@ const ProductList = () => {
         }
     });
 
+    // Pagination logic
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const pageNumbers = [];
+    for (let i = 1; i <= Math.ceil(products.length / productsPerPage); i++) {
+        pageNumbers.push(i);
+    }
+
     return (
         <div className="main-page">
             <header className="header">
@@ -66,7 +80,7 @@ const ProductList = () => {
             </div>
             <div className="product-list">
                 <div className="product-grid">
-                    {sortedProducts.map(product => (
+                    {currentProducts.map(product => (
                         <div className="product-card" key={product.id}>
                             {product.image_url && (
                                 <img src={product.image_url} alt={product.name} className="product-image" />
@@ -75,6 +89,17 @@ const ProductList = () => {
                             <p className="product-price">{product.price} zł</p>
                             <Link to={`/product/${product.id}`} className="product-details-button">View Details</Link>
                         </div>
+                    ))}
+                </div>
+                <div className="pagination">
+                    {pageNumbers.map(number => (
+                        <button
+                            key={number}
+                            onClick={() => paginate(number)}
+                            className={`page-button ${number === currentPage ? 'active' : ''}`}
+                        >
+                            {number}
+                        </button>
                     ))}
                 </div>
             </div>
