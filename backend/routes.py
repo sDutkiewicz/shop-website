@@ -1,28 +1,26 @@
-from flask import Blueprint, jsonify, request, send_from_directory, current_app, abort
-from backend.models import Product, db
+from flask import Blueprint, jsonify, request, send_from_directory, current_app, abort, session
+from backend.models import User, Product, CartItem, db
 import os
+
 
 routes = Blueprint('routes', __name__)
 
 # Serve React App
+# Serve React App
 @routes.route('/', defaults={'path': ''})
 @routes.route('/<path:path>')
 def serve_react_app(path):
-    # print(f"Requested path: {path}")
     full_path = os.path.join(current_app.static_folder, path)
-    # print(f"Full path to file: {full_path}")
 
     if path != "" and os.path.exists(full_path):
-        # print(f"Serving file from static directory: {full_path}")
         return send_from_directory(current_app.static_folder, path)
     else:
         index_path = os.path.join(current_app.static_folder, 'index.html')
         if os.path.exists(index_path):
-            # print(f"File not found. Serving index.html from static directory: {index_path}")
             return send_from_directory(current_app.static_folder, 'index.html')
         else:
-            # print(f"index.html not found in the static directory: {index_path}")
             return abort(404)
+
 
 # API to get all products
 @routes.route('/api/products', methods=['GET'])
@@ -100,3 +98,52 @@ def get_product(id):
         'image_url_3': f'/uploads/{product.image_url_3}' if product.image_url_3 else None,
     }
     return jsonify(product_data)
+
+
+@routes.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'Email already registered'}), 400
+    
+    new_user = User(name=name, email=email)
+    new_user.set_password(password)
+    
+    db.session.add(new_user)
+    db.session.commit()
+    
+    return jsonify({'message': 'User registered successfully'}), 201
+
+# User Login
+@routes.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    
+    user = User.query.filter_by(email=email).first()
+    if user is None or not user.check_password(password):
+        return jsonify({'error': 'Invalid email or password'}), 401
+    
+    session['user_id'] = user.id
+    session['user_name'] = user.name
+    return jsonify({'message': 'Logged in successfully', 'user': {'name': user.name, 'email': user.email}}), 200
+
+# User Logout
+@routes.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    session.pop('user_name', None)
+    return jsonify({'message': 'Logged out successfully'}), 200
+
+# Check if user is logged in
+@routes.route('/check_session', methods=['GET'])
+def check_session():
+    if 'user_id' in session:
+        return jsonify({'logged_in': True, 'user_name': session.get('user_name')})
+    else:
+        return jsonify({'logged_in': False})
