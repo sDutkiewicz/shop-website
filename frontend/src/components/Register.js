@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './style.css';
 
-const Register = () => {
+const Register = ({ onLogin }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -14,7 +15,8 @@ const Register = () => {
 
         axios.post('/register', { name, email, password })
             .then(response => {
-                navigate('/login');
+                onLogin();  // Notify App component that registration was successful
+                navigate('/');
             })
             .catch(error => {
                 setError(error.response.data.error);
@@ -24,7 +26,7 @@ const Register = () => {
     return (
         <div>
             <h1>Register</h1>
-            {error && <p>{error}</p>}
+            {error && <p className="error-message">{error}</p>}
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"
