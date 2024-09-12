@@ -6,6 +6,7 @@ import './ProductDetail.css';
 const ProductDetail = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         axios.get(`/api/products/${id}`)
@@ -16,6 +17,16 @@ const ProductDetail = () => {
                 console.error('Error fetching product details:', error);
             });
     }, [id]);
+
+    const handleAddToCart = () => {
+        axios.post('/api/cart/add', { product_id: product.id, quantity })
+            .then(response => {
+                alert('Product added to cart');
+            })
+            .catch(error => {
+                console.error('Error adding product to cart:', error);
+            });
+    };
 
     if (!product) {
         return <div>Loading...</div>;
@@ -37,7 +48,16 @@ const ProductDetail = () => {
                 </div>
                 <div className="product-info">
                     <p className="product-description">{product.description}</p>
-                    <button className="buy-button">Buy Now</button>
+                    <div className="product-actions">
+                        <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            className="quantity-input"
+                        />
+                        <button onClick={handleAddToCart} className="buy-button">Add to Cart</button>
+                    </div>
                 </div>
             </div>
             <Link to="/" className="back-button">Back to Shop</Link>

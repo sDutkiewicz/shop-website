@@ -39,5 +39,8 @@ class CartItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, default=1)
 
+    product = db.relationship('Product', backref=db.backref('cart_items', lazy=True))
+
     def __repr__(self):
         return f'<CartItem {self.user_id} - {self.product_id}>'
+

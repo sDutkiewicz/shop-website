@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request, send_from_directory, current_app,
 from backend.models import User, Product, CartItem, db
 import os
 
-
 routes = Blueprint('routes', __name__)
 
 # Serve React App
@@ -34,6 +33,7 @@ def get_products():
         'image_url': f'/uploads/{product.image_url_1}' if product.image_url_1 else None,
     } for product in products]
     return jsonify(products_list)
+
 
 
 
@@ -147,3 +147,45 @@ def check_session():
         return jsonify({'logged_in': True, 'user_name': session.get('user_name')})
     else:
         return jsonify({'logged_in': False})
+    
+@routes.route('/api/cart/add', methods=['POST'])
+def add_to_cart():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    data = request.json
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
+
+    cart_item = CartItem.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+    if cart_item:
+        # If the product is already in the cart, update the quantity
+        cart_item.quantity += quantity
+    else:
+        # If the product is not in the cart, add it as a new item
+        new_cart_item = CartItem(user_id=user_id, product_id=product_id, quantity=quantity)
+        db.session.add(new_cart_item)
+
+    db.session.commit()
+
+    return jsonify({'message': 'Product added to cart successfully'}), 201
+
+
+@routes.route('/api/cart', methods=['GET'])
+def get_cart():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify([])  # Return an empty list if the user is not logged in
+
+    cart_items = CartItem.query.filter_by(user_id=user_id).all()
+    cart_list = [{
+        'id': item.product.id,
+        'name': item.product.name,
+        'price': item.product.price,
+        'quantity': item.quantity,
+        'image_url': f'/uploads/{item.product.image_url_1}',
+    } for item in cart_items]
+
+    return jsonify(cart_list)

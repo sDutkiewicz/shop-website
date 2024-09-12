@@ -1,44 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Register from './components/Register';
-import Login from './components/Login';
+import axios from 'axios';
 import ProductList from './components/ProductList';
 import ProductDetail from './components/ProductDetail';
 import Admin from './components/Admin';
-import axios from 'axios';
-import './style.css';
+import Register from './components/Register';
+import Login from './components/Login';
+import Cart from './components/Cart';
+import './App.css';
 
 function App() {
     const [loggedIn, setLoggedIn] = useState(false);
-    const [userName, setUserName] = useState('');
-    const [showMessage, setShowMessage] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
         axios.get('/check_session')
             .then(response => {
                 if (response.data.logged_in) {
                     setLoggedIn(true);
-                    setUserName(response.data.user_name);
                 }
             })
             .catch(error => {
                 console.error('Error checking session:', error);
             });
-    }, []);
 
-    const handleLogin = () => {
-        setLoggedIn(true);
-        setShowMessage(true);
-        setTimeout(() => setShowMessage(false), 3000);
-    };
+        axios.get('/api/cart')
+            .then(response => {
+                setCartCount(response.data.cart_items.length);
+            })
+            .catch(error => {
+                console.error('Error fetching cart count:', error);
+            });
+    }, []);
 
     const handleLogout = () => {
         axios.post('/logout')
-            .then(response => {
+            .then(() => {
                 setLoggedIn(false);
-                setUserName('');
-                setShowMessage(true);
-                setTimeout(() => setShowMessage(false), 3000);
+                setCartCount(0);
             })
             .catch(error => {
                 console.error('Error logging out:', error);
@@ -47,33 +46,36 @@ function App() {
 
     return (
         <Router>
-            <div>
-                <nav>
-                    <div className="nav-left">
-                        <Link to="/">Home</Link>
-                        {!loggedIn && <Link to="/register">Register</Link>}
-                        {!loggedIn && <Link to="/login">Login</Link>}
-                    </div>
-                    {loggedIn && (
-                        <div className="nav-right">
-                            <span>Welcome, {userName}!</span>
-                            <button className="logout-button" onClick={handleLogout}>Logout</button>
+            <div className="App">
+                <header className="App-header">
+                    <nav>
+                        <div className="nav-left">
+                            <h1>My Shop</h1>
+                            <Link to="/">Home</Link>
                         </div>
-                    )}
-                </nav>
-                
-                {showMessage && (
-                    <div className="header-message">
-                        {loggedIn ? `Successfully logged in as ${userName}` : "You have been logged out."}
-                    </div>
-                )}
-
+                        <div className="nav-right">
+                            <Link to="/cart" className="cart-link">
+                                <img src="/path/to/cart-icon.png" alt="Cart" className="cart-icon" />
+                                <span className="cart-count">{cartCount}</span>
+                            </Link>
+                            {loggedIn ? (
+                                <button onClick={handleLogout} className="logout-button">Logout</button>
+                            ) : (
+                                <>
+                                    <Link to="/register">Register</Link>
+                                    <Link to="/login">Login</Link>
+                                </>
+                            )}
+                        </div>
+                    </nav>
+                </header>
                 <Routes>
                     <Route path="/" element={<ProductList />} />
-                    <Route path="/register" element={!loggedIn ? <Register onLogin={handleLogin} /> : <div>You are already registered and logged in.</div>} />
-                    <Route path="/login" element={!loggedIn ? <Login onLogin={handleLogin} /> : <div>You are already logged in.</div>} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/cart" element={<Cart />} />
                 </Routes>
             </div>
         </Router>
