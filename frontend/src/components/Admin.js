@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './admin.css';
-
+import ImageCropperPopup from './ImageCropperPopup';
 
 const Admin = () => {
     const [name, setName] = useState('');
@@ -11,7 +11,26 @@ const Admin = () => {
     const [image1, setImage1] = useState(null);
     const [image2, setImage2] = useState(null);
     const [image3, setImage3] = useState(null);
+    const [cropping, setCropping] = useState(false);
+    const [croppedImage, setCroppedImage] = useState(null);
     const navigate = useNavigate();
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setImage1(reader.result);
+                setCropping(true);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCropComplete = (croppedImg) => {
+        setCroppedImage(croppedImg);
+        setCropping(false);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -20,7 +39,7 @@ const Admin = () => {
         formData.append('name', name);
         formData.append('price', price);
         formData.append('description', description);
-        if (image1) formData.append('image_1', image1);
+        if (croppedImage) formData.append('image_1', croppedImage);
         if (image2) formData.append('image_2', image2);
         if (image3) formData.append('image_3', image3);
 
@@ -48,7 +67,7 @@ const Admin = () => {
                         required
                     />
                 </div>
-                
+
                 <div className="form-group">
                     <label htmlFor="price">Product Price:</label>
                     <input
@@ -60,7 +79,7 @@ const Admin = () => {
                         required
                     />
                 </div>
-                
+
                 <div className="form-group">
                     <label htmlFor="description">Product Description:</label>
                     <textarea
@@ -70,13 +89,13 @@ const Admin = () => {
                         rows="4"
                     />
                 </div>
-                
+
                 <div className="form-group">
                     <label htmlFor="image1">Product Image 1:</label>
                     <input
                         type="file"
                         id="image1"
-                        onChange={(e) => setImage1(e.target.files[0])}
+                        onChange={handleImageChange}
                         accept="image/*"
                     />
                 </div>
@@ -100,9 +119,16 @@ const Admin = () => {
                         accept="image/*"
                     />
                 </div>
-                
+
                 <button type="submit" className="submit-btn">Add Product</button>
             </form>
+            {cropping && (
+                <ImageCropperPopup
+                    imageSrc={image1}
+                    onCropComplete={handleCropComplete}
+                    onClose={() => setCropping(false)}
+                />
+            )}
             <a href="/" className="back-link">Back to Main Page</a>
         </div>
     );

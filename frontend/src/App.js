@@ -14,6 +14,7 @@ function App() {
     const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
+        // Check session to see if the user is logged in
         axios.get('/check_session')
             .then(response => {
                 if (response.data.logged_in) {
@@ -23,15 +24,18 @@ function App() {
             .catch(error => {
                 console.error('Error checking session:', error);
             });
-
+    
+        // Get the cart count
         axios.get('/api/cart')
             .then(response => {
-                setCartCount(response.data.cart_items.length);
+                const cartItems = response.data.cart_items || [];
+                setCartCount(cartItems.length);
             })
             .catch(error => {
                 console.error('Error fetching cart count:', error);
             });
     }, []);
+    
 
     const handleLogout = () => {
         axios.post('/logout')
