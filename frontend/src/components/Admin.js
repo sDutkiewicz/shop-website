@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './admin.css';
@@ -13,7 +13,24 @@ const Admin = () => {
     const [image3, setImage3] = useState(null);
     const [cropping, setCropping] = useState(false);
     const [croppedImage, setCroppedImage] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check if user is logged in and is an admin
+        axios.get('/check_session')
+            .then(response => {
+                if (response.data.logged_in && response.data.is_admin) {
+                    setIsAdmin(true);
+                } else {
+                    navigate('/');  // Redirect to home if not an admin
+                }
+            })
+            .catch(error => {
+                console.error('Error checking session:', error);
+                navigate('/');  // Redirect to home if there's an error
+            });
+    }, [navigate]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -52,6 +69,10 @@ const Admin = () => {
                 console.error('Error adding product:', error);
             });
     };
+
+    if (!isAdmin) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="admin">

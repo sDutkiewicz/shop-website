@@ -8,6 +8,7 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)  # New field
     cart = db.relationship('CartItem', backref='user', lazy=True)
 
     def set_password(self, password):
