@@ -40,23 +40,46 @@ body {
     justify-content: space-between;
 }
 
-.image-gallery {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.main-image-container {
     flex: 1;
+    margin-right: 20px;
 }
 
-.product-image {
+.main-product-image {
     width: 100%;
     height: auto;
-    max-width: 350px;
+    max-width: 600px;
     border-radius: 5px;
     object-fit: cover;
+    transition: transform 0.2s ease-in-out;
+}
+
+.main-product-image:hover {
+    transform: scale(1.05);
+}
+
+.thumbnails-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.thumbnail-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s;
+}
+
+.thumbnail-image:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
 }
 
 .product-info {
-    flex: 2;
+    flex: 1;
     padding-left: 20px;
 }
 

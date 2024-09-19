@@ -3,29 +3,31 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './style.css';
 
-const Login = ({ onLogin }) => {
+
+const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = (event) => {
         event.preventDefault();
-
         axios.post('/login', { email, password })
             .then(response => {
-                onLogin();  // Notify App component that login was successful
+                // After successful login, redirect to the main page
                 navigate('/');
+                window.location.reload(); // Reload to ensure the header is updated
             })
             .catch(error => {
-                setError(error.response.data.error);
+                setErrorMessage('Invalid email or password');
+                console.error('Login error:', error);
             });
     };
 
     return (
-        <div>
+        <div className="login">
             <h1>Login</h1>
-            {error && <p className="error-message">{error}</p>}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
             <form onSubmit={handleSubmit}>
                 <input
                     type="email"
